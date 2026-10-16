@@ -11,6 +11,7 @@ e widgets do Blogger totalmente estilizados.
 - **Cor de destaque configurável** pelo Designer de Temas do Blogger
 - Home com **herói em destaque + grid de cartões**, página de post com **leitura longa**, comentários funcionando, posts relacionados, barra de progresso e compartilhamento
 - **404 autoral**, busca em overlay (atalho `/`), menu drawer no mobile, cabeçalho inteligente
+- **Monetização de links integrada** (linkmonetizado.com, script de página inteira) com lista de exclusão de domínios — os links internos do blog nunca são monetizados
 - SEO (Open Graph, microdata `BlogPosting`), acessibilidade (WCAG AA/AAA verificado por script, foco visível, `prefers-reduced-motion`) e performance (lazy loading, `preconnect`, `display=swap`, script `defer`)
 
 ---
@@ -48,6 +49,27 @@ Perfil, Rótulos e Arquivo — todos substituíveis em **Layout → Barra latera
 
 O modo escuro deriva automaticamente do acento escolhido (o tema clareia a cor
 para manter contraste AAA sobre o fundo escuro).
+
+### Monetização de links (linkmonetizado.com)
+
+O tema já vem com o script de página inteira do linkmonetizado.com configurado
+no fim do `<body>` — ele converte automaticamente os **links externos** dos
+posts em links monetizados. A configuração fica em `src/theme.template.xml`
+(bloco “MONETIZAÇÃO DE LINKS”):
+
+```js
+var app_url = 'https://linkmonetizado.com/';
+var app_api_token = 'seu-token';
+var app_advert = 1;
+var app_exclude_domains = ["hail-games.blogspot.com","linkmonetizado.com","do.webjogos.top"];
+```
+
+- **app_exclude_domains** protege o blog e parceiros: nenhum domínio listado é
+  monetizado (links internos, downloads do próprio site etc.). Adicione outros
+  domínios separados por vírgula.
+- Para editar sem rebuild: **Tema → Editar HTML**, busque por `app_api_token`.
+- O token fica visível no código-fonte da página **por design do serviço**
+  (o navegador do visitante precisa dele para gerar os links).
 
 ### Pelo código (design system)
 
@@ -103,6 +125,7 @@ referência em `preview/capturas/`).
 - **Posts relacionados** dependem do feed JSON público do blog; blogs sem rótulos recebem a lista de recentes. Em blogs privados o feed não fica exposto e a seção simplesmente não aparece.
 - O widget **FeaturedPost** não é usado por padrão (o herói usa o primeiro post da home via loop, que é mais flexível); é possível adicioná-lo em **Layout** se preferir.
 - Comentários: o tema usa o sistema encadeado nativo do Blogger (includables padrão do motor, mesma estratégia dos temas oficiais) — comentários de terceiros (Disqus etc.) exigem ajuste manual.
+- O script de monetização é carregado de um serviço externo (linkmonetizado.com); se o serviço sair do ar, os links simplesmente permanecem originais — nada quebra no tema.
 - Próximos passos sugeridos: índice/sumário automático para posts longos, paginação por carregamento infinito opcional, botão de newsletter no rodapé e variáveis de fontes no Designer de Temas.
 
 ## Licença

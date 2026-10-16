@@ -208,3 +208,39 @@ Analisadas (observação de padrões públicos — nada foi copiado):
   5. `data-tempo-leitura` sem valor violava o XML — corrigido com `=''`.
 - **CI**: workflow verde na `main`; `theme.xml` publicado como artefato e como
   asset da release v1.0.0 (sha256 conferido contra o build local).
+
+---
+
+## v1.1.0 — Monetização de links (linkmonetizado.com)
+
+**Pedido do usuário**: incluir o script de página inteira do linkmonetizado.com
+e manter o tema responsivo.
+
+Decisões de implementação:
+
+- **Posição**: bloco colocado no fim do `<body>`, **depois** do script principal
+  do tema e **antes** de `</body>`. As variáveis (`app_url`, `app_api_token`,
+  `app_advert`, `app_exclude_domains`) são declaradas em um `<script>` que
+  antecede o `<script src='https://linkmonetizado.com/js/full-page-script.js'>`;
+  a ordem sequencial de execução garante que o script externo encontre a
+  configuração pronta.
+- **CDATA**: o bloco de variáveis fica dentro de `//<![CDATA[ ... //]]>`
+  (mesma técnica dos demais scripts do tema) — blindagem contra o parser XML
+  do Blogger. Os valores não contêm `&`, `<` ou `>`, mas o CDATA torna a
+  manutenção segura mesmo se a lista de exclusão crescer.
+- **URL explícita em `https:`**: o snippet original usava URL protocol-relative
+  (`//linkmonetizado.com/...`). Como o Blogger serve todas as páginas em HTTPS,
+  o resultado é idêntico; explicitar o protocolo evita ambiguidade em previews
+  e no editor. Valores de configuração mantidos exatamente como fornecidos.
+- **Sem `defer` no script externo**: scripts clássicos no fim do corpo executam
+  durante o parsing, antes dos scripts `defer` — comportamento idêntico ao
+  snippet original do serviço (reescrita de links no carregamento).
+- **Exclusões**: `hail-games.blogspot.com` (o próprio blog), `linkmonetizado.com`
+  e `do.webjogos.top` ficam fora da monetização — links internos nunca são
+  convertidos, evitando loop de redirecionamento.
+- **Responsividade**: inalterada — o script apenas reescreve `href`s externos;
+  o layout mobile-first (13 media queries, fluid type com `clamp()`) segue
+  intacto.
+- **Nota de segurança**: o `app_api_token` é público por natureza (o navegador
+  do visitante o executa); documentado no README. Segredo de repositório ele
+  não é.

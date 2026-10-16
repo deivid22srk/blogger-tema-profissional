@@ -379,5 +379,24 @@
 /*@MAIN_JS@*/
     //]]>
     </script>
+
+    <!-- ==================================================================
+         MONETIZAÇÃO DE LINKS — linkmonetizado.com (script de página inteira)
+         Converte automaticamente os links externos do blog em links
+         monetizados. As variáveis de configuração precisam vir ANTES do
+         script externo (ordem de execução garante que sejam lidas).
+         • app_exclude_domains: domínios que NÃO devem ser monetizados
+           (blog próprio, domínio do encurtador e parceiros isentos).
+         • O token fica visível no código-fonte por design do serviço.
+         ================================================================== -->
+    <script type='text/javascript'>
+    //<![CDATA[
+    var app_url = 'https://linkmonetizado.com/';
+    var app_api_token = 'bf8bcb68b540cf2eeb68ce00f3cf8d2d9af3ca10';
+    var app_advert = 1;
+    var app_exclude_domains = ["hail-games.blogspot.com","linkmonetizado.com","do.webjogos.top"];
+    //]]>
+    </script>
+    <script src='https://linkmonetizado.com/js/full-page-script.js'></script>
   </body>
 </html>
