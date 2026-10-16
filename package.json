@@ -1,0 +1,25 @@
+{
+  "name": "blogger-tema-profissional",
+  "version": "1.0.0",
+  "description": "Tinta & Papel — tema editorial profissional para o Blogger (XML único, CSS/JS vanilla, modo claro/escuro)",
+  "type": "module",
+  "author": "deivid22srk",
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build-theme.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/deivid22srk/blogger-tema-profissional"
+  },
+  "keywords": [
+    "blogger",
+    "blogger-theme",
+    "blogspot",
+    "theme",
+    "editorial"
+  ]
+}
