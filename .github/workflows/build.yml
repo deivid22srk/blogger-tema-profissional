@@ -1,0 +1,49 @@
+# Build do tema Tinta & Papel — gera e valida dist/theme.xml a cada push.
+# Zero dependências de npm: apenas Node nativo + validador XML (xmllint).
+name: build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+
+      # Sem npm ci: o projeto não tem dependências (build usa só node:fs/promises
+      # e node:child_process). O cache do npm fica aqui caso dependências de
+      # desenvolvimento sejam adicionadas no futuro.
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Instala xmllint (validador XML)
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Monta dist/theme.xml
+        run: node scripts/build-theme.mjs
+
+      - name: Verificação estrutural (widgets, sections, skin)
+        run: python3 scripts/validar-estrutura.py dist/theme.xml
+
+      - name: Publica artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme
+          path: dist/theme.xml
+          if-no-files-found: error
