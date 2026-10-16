@@ -1,0 +1,408 @@
+<!-- ==========================================================================
+  WIDGET BLOG (versão 2) — Tinta & Papel
+  Injetado pelo build no ponto de montagem do widget Blog.
+  Includables:
+    main            → despacha entre erro, post/página e listas
+    paginaErro      → 404 autoral
+    cabecalhoLista  → títulos de busca/rótulo/arquivo
+    semResultados   → estado vazio com busca
+    heroPost        → primeiro post da home em evidência
+    cartaoPost      → cartão do grid
+    paginacaoLista  → paginação (blog-pager)
+    postPagina      → artigo completo (post ou página estática)
+    commentPicker   → escolhe o sistema de comentários (padrão do motor)
+    comments/commentList/commentItem/commentAuthorAvatar/commentDeleteIcon
+    commentForm/commentFormIframeSrc → sistema plano com formulário embutido
+    commentsTitle   → título da seção de comentários
+  Nota: threadedComments, iframeComments e addComments são includables
+  padrão do motor do Blogger (mesma estratégia dos temas oficiais).
+  ========================================================================== -->
+<b:includable id='main'>
+  <b:if cond='data:view.isError'>
+    <b:include name='paginaErro'/>
+  <b:elseif cond='data:view.isSingleItem'/>
+    <b:loop values='data:posts' var='post'>
+      <b:include data='post' name='postPagina'/>
+    </b:loop>
+  <b:else/>
+    <b:include name='cabecalhoLista'/>
+    <b:if cond='data:posts.size == 0'>
+      <b:include name='semResultados'/>
+    <b:else/>
+      <b:if cond='data:view.isHomepage'>
+        <!-- Home: primeiro post vira herói, o resto vai para o grid -->
+        <b:loop index='i' values='data:posts' var='post'>
+          <b:if cond='data:i == 0'>
+            <b:include data='post' name='heroPost'/>
+          </b:if>
+        </b:loop>
+        <div class='grade-cartoes'>
+          <b:loop index='i' values='data:posts' var='post'>
+            <b:if cond='data:i != 0'>
+              <b:include data='post' name='cartaoPost'/>
+            </b:if>
+          </b:loop>
+        </div>
+      <b:else/>
+        <div class='grade-cartoes'>
+          <b:loop values='data:posts' var='post'>
+            <b:include data='post' name='cartaoPost'/>
+          </b:loop>
+        </div>
+      </b:if>
+      <b:include name='paginacaoLista'/>
+    </b:if>
+  </b:if>
+</b:includable>
+
+<b:includable id='paginaErro'>
+  <section class='erro'>
+    <p aria-hidden='true' class='erro__codigo'>404</p>
+    <h1 class='erro__titulo'>Esta página não foi encontrada</h1>
+    <p>O endereço acessado não existe, foi movido ou nunca recebeu tinta.
+       Confira o caminho ou busque pelo conteúdo abaixo.</p>
+    <form class='busca__form' expr:action='data:blog.searchUrl' role='search'>
+      <input class='busca__entrada' expr:aria-label='data:messages.searchThisBlog' expr:placeholder='data:messages.searchThisBlog' name='q' type='search'/>
+      <button class='botao' type='submit'>Buscar</button>
+    </form>
+    <p><a class='botao botao--contorno' expr:href='data:blog.homepageUrl'>Voltar para a página inicial</a></p>
+  </section>
+</b:includable>
+
+<b:includable id='cabecalhoLista'>
+  <b:if cond='data:view.isLabelSearch'>
+    <header class='cabecalho-lista'>
+      <span class='versalete'>Rótulo</span>
+      <h1 class='cabecalho-lista__titulo'><data:view.search.label/></h1>
+    </header>
+  <b:elseif cond='data:view.isSearch'/>
+    <header class='cabecalho-lista'>
+      <span class='versalete'>Busca</span>
+      <h1 class='cabecalho-lista__titulo'>
+        <b:if cond='data:view.search.query'><data:view.search.query.escaped/>
+        <b:else/>Todos os resultados
+        </b:if>
+      </h1>
+    </header>
+  <b:elseif cond='data:view.isArchive'/>
+    <header class='cabecalho-lista'>
+      <span class='versalete'>Arquivo</span>
+      <h1 class='cabecalho-lista__titulo'><data:view.title.escaped/></h1>
+    </header>
+  </b:if>
+</b:includable>
+
+<b:includable id='semResultados'>
+  <section class='vazio'>
+    <h2 class='vazio__titulo'>Nada publicado por aqui</h2>
+    <p>Nenhuma postagem corresponde a esta página. Experimente buscar por
+       outro termo ou voltar à página inicial.</p>
+    <form class='busca__form' expr:action='data:blog.searchUrl' role='search'>
+      <input class='busca__entrada' expr:aria-label='data:messages.searchThisBlog' expr:placeholder='data:messages.searchThisBlog' name='q' type='search'/>
+      <button class='botao' type='submit'>Buscar</button>
+    </form>
+    <p><a class='botao botao--contorno' expr:href='data:blog.homepageUrl'>Voltar para a home</a></p>
+  </section>
+</b:includable>
+
+<b:includable id='heroPost' var='post'>
+  <article class='hero' itemscope='itemscope' itemtype='https://schema.org/BlogPosting'>
+    <a class='hero__midia' expr:aria-label='data:post.title' expr:href='data:post.url' tabindex='-1'>
+      <b:if cond='data:post.featuredImage'>
+        <img decoding='async' expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 1200, &quot;1200:750&quot;)' fetchpriority='high' height='750' width='1200'/>
+      <b:else/>
+        <div class='cartao__sem-imagem'>
+          <span aria-hidden='true'><b:eval expr='data:post.title snippet { length: 1, links: false }'/></span>
+        </div>
+      </b:if>
+    </a>
+    <div class='hero__texto'>
+      <div class='hero__etiqueta'><span class='chip'>Destaque</span></div>
+      <h2 class='hero__titulo' itemprop='headline'>
+        <a expr:href='data:post.url'><data:post.title/></a>
+      </h2>
+      <p class='hero__resumo'><data:post.snippets.long/></p>
+      <div class='cartao__meta'>
+        <time expr:datetime='data:post.date.iso8601'><data:post.date/></time>
+        <span class='separador' aria-hidden='true'></span>
+        <span itemprop='author' itemscope='itemscope' itemtype='https://schema.org/Person'>
+          <span itemprop='name'><data:post.author.name/></span>
+        </span>
+      </div>
+      <a class='leia-mais' expr:href='data:post.url'>
+        Ler o post
+        <svg class='seta' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M5 12h14'/><path d='m13 6 6 6-6 6'/></svg>
+      </a>
+    </div>
+  </article>
+</b:includable>
+
+<b:includable id='cartaoPost' var='post'>
+  <article class='cartao'>
+    <a class='cartao__midia' expr:aria-label='data:post.title' expr:href='data:post.url' tabindex='-1'>
+      <b:if cond='data:post.featuredImage'>
+        <img decoding='async' expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 720, &quot;720:480&quot;)' height='480' loading='lazy' width='720'/>
+      <b:else/>
+        <div class='cartao__sem-imagem'>
+          <span aria-hidden='true'><b:eval expr='data:post.title snippet { length: 1, links: false }'/></span>
+        </div>
+      </b:if>
+    </a>
+    <div class='cartao__meta'>
+      <time expr:datetime='data:post.date.iso8601'><data:post.date/></time>
+      <span class='separador' aria-hidden='true'></span>
+      <span><data:post.author.name/></span>
+    </div>
+    <h3 class='cartao__titulo'>
+      <a expr:href='data:post.url'><data:post.title/></a>
+    </h3>
+    <p class='cartao__resumo'><data:post.snippets.short/></p>
+    <div class='cartao__rodape'>
+      <a expr:href='data:post.url fragment &quot;comments&quot;'>
+        <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/></svg>
+        <b:if cond='data:post.numberOfComments &gt; 0'>
+          <b:message name='messages.numberOfComments'>
+            <b:param expr:value='data:post.numberOfComments' name='numComments'/>
+          </b:message>
+        <b:else/>
+          <data:messages.postAComment/>
+        </b:if>
+      </a>
+    </div>
+  </article>
+</b:includable>
+
+<b:includable id='paginacaoLista'>
+  <b:if cond='data:olderPageUrl or data:newerPageUrl'>
+    <nav aria-label='Paginação' class='paginacao'>
+      <b:if cond='data:newerPageUrl'>
+        <a class='paginacao__botao' expr:href='data:newerPageUrl'>
+          <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M19 12H5'/><path d='m11 18-6-6 6-6'/></svg>
+          Recentes
+        </a>
+      <b:else/>
+        <span aria-hidden='true'></span>
+      </b:if>
+      <b:if cond='data:olderPageUrl'>
+        <a class='paginacao__botao' expr:href='data:olderPageUrl'>
+          Anteriores
+          <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M5 12h14'/><path d='m13 6 6 6-6 6'/></svg>
+        </a>
+      </b:if>
+    </nav>
+  </b:if>
+</b:includable>
+
+<b:includable id='postPagina' var='post'>
+  <article class='post medida-leitura' itemscope='itemscope' itemtype='https://schema.org/BlogPosting'>
+    <header>
+      <b:if cond='data:view.isPost and data:post.labels'>
+        <nav aria-label='Rótulos do post' class='post__rotulos'>
+          <b:loop values='data:post.labels' var='label'>
+            <a class='chip' expr:href='data:label.url'><data:label.name/></a>
+          </b:loop>
+        </nav>
+      </b:if>
+      <h1 class='post__titulo' itemprop='headline'><data:post.title/></h1>
+
+      <b:if cond='data:view.isPost'>
+        <div class='post__meta'>
+          <span class='post__autor' itemprop='author' itemscope='itemscope' itemtype='https://schema.org/Person'>
+            <b:if cond='data:post.author.authorPhoto.url'>
+              <img decoding='async' expr:alt='data:post.author.name' expr:src='data:post.author.authorPhoto.url' height='36' loading='lazy' width='36'/>
+            </b:if>
+            <span class='post__autor-nome' itemprop='name'>
+              <b:if cond='data:post.author.profileUrl'>
+                <a expr:href='data:post.author.profileUrl' rel='author'><data:post.author.name/></a>
+              <b:else/>
+                <data:post.author.name/>
+              </b:if>
+            </span>
+          </span>
+          <span class='post__meta-item'>
+            <time expr:datetime='data:post.date.iso8601' itemprop='datePublished'><data:post.date/></time>
+          </span>
+          <span class='post__meta-item'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><circle cx='12' cy='12' r='9'/><path d='M12 7v5l3 2'/></svg>
+            <span data-tempo-leitura=''></span>
+          </span>
+          <span class='post__meta-item'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/></svg>
+            <a expr:href='data:post.url fragment &quot;comments&quot;'>
+              <b:if cond='data:post.numberOfComments &gt; 0'>
+                <b:message name='messages.numberOfComments'>
+                  <b:param expr:value='data:post.numberOfComments' name='numComments'/>
+                </b:message>
+              <b:else/>
+                <data:messages.postAComment/>
+              </b:if>
+            </a>
+          </span>
+        </div>
+      </b:if>
+    </header>
+
+    <b:if cond='data:post.featuredImage'>
+      <figure class='post__capa' itemprop='image'>
+        <img expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 1200, &quot;1200:675&quot;)' fetchpriority='high' height='675' width='1200'/>
+      </figure>
+    </b:if>
+
+    <div class='post-corpo' id='post-corpo' itemprop='articleBody'>
+      <data:post.body/>
+    </div>
+
+    <b:if cond='data:view.isPost'>
+      <footer class='post__rodape'>
+        <div class='post__compartilhar'>
+          <span class='versalete'>Compartilhar</span>
+          <button aria-label='Compartilhar' class='botao-compartilhar' data-compartilhar='nativo' expr:data-titulo='data:post.title' expr:data-url='data:post.url' title='Compartilhar' type='button'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/><path d='m8.6 13.5 6.8 4M15.4 6.5l-6.8 4'/></svg>
+          </button>
+          <button aria-label='Compartilhar no X' class='botao-compartilhar' data-compartilhar='x' expr:data-titulo='data:post.title' expr:data-url='data:post.url' title='X' type='button'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M4 4l16 16'/><path d='M20 4 4 20'/></svg>
+          </button>
+          <button aria-label='Compartilhar no Facebook' class='botao-compartilhar' data-compartilhar='facebook' expr:data-titulo='data:post.title' expr:data-url='data:post.url' title='Facebook' type='button'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z'/></svg>
+          </button>
+          <button aria-label='Compartilhar no LinkedIn' class='botao-compartilhar' data-compartilhar='linkedin' expr:data-titulo='data:post.title' expr:data-url='data:post.url' title='LinkedIn' type='button'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4V9h4v1.5'/><rect height='12' width='4' x='2' y='9'/><circle cx='4' cy='4' r='2'/></svg>
+          </button>
+          <button aria-label='Compartilhar no Telegram' class='botao-compartilhar' data-compartilhar='telegram' expr:data-titulo='data:post.title' expr:data-url='data:post.url' title='Telegram' type='button'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='m22 2-7 20-4-9-9-4Z'/><path d='M22 2 11 13'/></svg>
+          </button>
+          <button aria-label='Copiar link' class='botao-compartilhar' data-compartilhar='copiar' expr:data-titulo='data:post.title' expr:data-url='data:post.url' title='Copiar link' type='button'>
+            <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.75' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'/><path d='M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'/></svg>
+          </button>
+        </div>
+      </footer>
+
+      <!-- Posts relacionados (carregados via feed JSON pelo main.js) -->
+      <section class='relacionados' expr:data-blog='data:blog.homepageUrl' hidden='hidden' id='posts-relacionados'>
+        <div class='titulo-secao'><h2>Leia também</h2></div>
+        <div class='relacionados__grade'>
+          <div class='relacionados__cartao' aria-hidden='true'><div class='esqueleto esqueleto--midia'></div><div class='esqueleto esqueleto--linha'></div><div class='esqueleto esqueleto--linha'></div></div>
+          <div class='relacionados__cartao' aria-hidden='true'><div class='esqueleto esqueleto--midia'></div><div class='esqueleto esqueleto--linha'></div><div class='esqueleto esqueleto--linha'></div></div>
+          <div class='relacionados__cartao' aria-hidden='true'><div class='esqueleto esqueleto--midia'></div><div class='esqueleto esqueleto--linha'></div><div class='esqueleto esqueleto--linha'></div></div>
+        </div>
+      </section>
+    </b:if>
+  </article>
+
+  <div class='medida-leitura'>
+    <b:include data='post' name='commentPicker'/>
+  </div>
+</b:includable>
+
+<b:includable id='commentPicker' var='post'>
+  <b:if cond='data:post.commentSource == 1'>
+    <b:include data='post' name='iframeComments'/>
+  <b:elseif cond='data:post.showThreadedComments'/>
+    <b:include data='post' name='threadedComments'/>
+  <b:else/>
+    <b:include data='post' name='comments'/>
+  </b:if>
+</b:includable>
+
+<b:includable id='comments' var='post'>
+  <section class='comentarios comments' id='comentarios'>
+    <a name='comments'></a>
+    <b:if cond='data:post.allowComments'>
+      <b:include name='commentsTitle'/>
+      <div class='comentarios__lista'>
+        <b:include cond='data:post.comments' data='post.comments' name='commentList'/>
+      </div>
+      <div class='comentarios__form'>
+        <b:if cond='data:post.embedCommentForm'>
+          <b:if cond='data:post.allowNewComments'>
+            <b:include data='post' name='commentForm'/>
+          <b:else/>
+            <p class='comentarios__aviso'><data:post.noNewCommentsText/></p>
+          </b:if>
+        <b:else/>
+          <b:include data='post' name='addComments'/>
+        </b:if>
+      </div>
+    </b:if>
+  </section>
+</b:includable>
+
+<b:includable id='commentsTitle'>
+  <h2 class='comentarios__titulo'>
+    <b:if cond='data:post.numberOfComments &gt; 0'>
+      Comentários <span class='comentarios__conta'><data:post.numberOfComments/></span>
+    <b:else/>
+      Deixe um comentário
+    </b:if>
+  </h2>
+</b:includable>
+
+<b:includable id='commentList' var='comments'>
+  <b:loop values='data:comments' var='comment'>
+    <b:include data='comment' name='commentItem'/>
+  </b:loop>
+</b:includable>
+
+<b:includable id='commentItem' var='comment'>
+  <div class='comentario' expr:id='&quot;c&quot; + data:comment.id'>
+    <b:include cond='data:blog.enabledCommentProfileImages' name='commentAuthorAvatar'/>
+    <div class='comentario__conteudo'>
+      <div class='comentario__cabecalho'>
+        <span class='comentario__autor'>
+          <b:if cond='data:comment.authorUrl'>
+            <a expr:href='data:comment.authorUrl' rel='nofollow'><data:comment.author/></a>
+          <b:else/>
+            <data:comment.author/>
+          </b:if>
+        </span>
+        <span class='comentario__quando'>
+          <a expr:href='data:comment.url' title='Link permanente para o comentário'>
+            <data:comment.timestamp/>
+          </a>
+        </span>
+        <b:include data='comment' name='commentDeleteIcon'/>
+      </div>
+      <div expr:class='&quot;comentario__corpo&quot; + (data:comment.isDeleted ? &quot; deleted&quot; : &quot;&quot;)'>
+        <data:comment.body/>
+      </div>
+    </div>
+  </div>
+</b:includable>
+
+<b:includable id='commentAuthorAvatar'>
+  <img class='comentario__avatar' decoding='async' expr:alt='data:comment.author' expr:src='data:comment.authorAvatarSrc' height='40' loading='lazy' width='40'/>
+</b:includable>
+
+<b:includable id='commentDeleteIcon' var='comment'>
+  <span expr:class='&quot;item-control &quot; + data:comment.adminClass'>
+    <b:if cond='data:showCmtPopup'>
+      <div class='goog-toggle-button'>
+        <div class='goog-inline-block comment-action-icon'></div>
+      </div>
+    <b:else/>
+      <a class='comment-delete' expr:href='data:comment.deleteUrl' expr:title='data:messages.deleteComment'>
+        <svg fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'><path d='M3 6h18'/><path d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6'/><path d='M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/></svg>
+      </a>
+    </b:if>
+  </span>
+</b:includable>
+
+<b:includable id='commentForm' var='post'>
+  <div class='comment-form'>
+    <a name='comment-form'></a>
+    <h4><data:messages.postAComment/></h4>
+    <b:if cond='data:this.messages.blogComment != &quot;&quot;'>
+      <p class='comentario__nota'><data:this.messages.blogComment/></p>
+    </b:if>
+    <b:include data='post' name='commentFormIframeSrc'/>
+    <iframe allowtransparency='allowtransparency' class='blogger-iframe-colorize blogger-comment-from-post' expr:height='data:cmtIframeInitialHeight ?: &quot;240px&quot;' frameborder='0' id='comment-editor' name='comment-editor' src='' title='Formulário de comentários do Blogger' width='100%'></iframe>
+    <data:post.cmtfpIframe/>
+    <script type='text/javascript'>
+      BLOG_CMT_createIframe('<data:post.appRpcRelayPath/>');
+    </script>
+  </div>
+</b:includable>
+
+<b:includable id='commentFormIframeSrc' var='post'>
+  <a expr:href='data:post.commentFormIframeSrc' id='comment-editor-src'></a>
+</b:includable>
