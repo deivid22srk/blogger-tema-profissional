@@ -188,3 +188,23 @@ Analisadas (observação de padrões públicos — nada foi copiado):
 - **404 autoral**, paginação com setas, barra de progresso de leitura, voltar ao topo,
   botão de copiar link com toast, busca em overlay.
 - Textos de interface em pt-BR (idioma-alvo do tema), documentado como limitação.
+
+---
+
+## 3. Validação executada (Fase 2/3)
+
+- **XML**: boa formação confirmada com `lxml` (local) e `xmllint` (CI); verificação
+  estrutural própria: 11 widgets com `main`, 9 sections com `id` únicos, skin com
+  43 KB de CSS e variáveis do Designer declaradas (21 includables resolvidos).
+- **Visual**: maquete estática (`preview/`) conferida em navegador headless em
+  6 combinações — home/post × desktop/mobile × claro/escuro — além do drawer
+  mobile e da busca em overlay. Correções resultantes da validação:
+  1. `.leia-mais .seta` sem largura explícita comprimia o texto do link;
+  2. `--cor-tinta` no escuro estava com valor de papel (rodapé invisível);
+  3. `transform`/`backdrop-filter` no cabeçalho criavam *containing block*
+     e quebravam o `position: fixed` do drawer — corrigido animando `top` e
+     movendo o blur para `.topo::before`;
+  4. overlay de busca ganhou fundo escurecido real (`rgba(15,12,9,.45)` + blur);
+  5. `data-tempo-leitura` sem valor violava o XML — corrigido com `=''`.
+- **CI**: workflow verde na `main`; `theme.xml` publicado como artefato e como
+  asset da release v1.0.0 (sha256 conferido contra o build local).
