@@ -13,6 +13,34 @@
   var movimentoReduzido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /* ------------------------------------------------------------------
+   * 0. REALOCAÇÃO DE WIDGETS DESLOCADOS — ao instalar o tema sobre um
+   * blog já existente, o Blogger costuma despejar os widgets antigos na
+   * primeira seção que aceita widgets, que é o "Menu principal" (dentro
+   * do cabeçalho). No PC a navegação é estática e esses widgets
+   * transbordavam do cabeçalho fixo, cobrindo a página inteira. O CSS do
+   * tema já os esconde como retaguarda; aqui eles são realocados para o
+   * fim da barra lateral (#lateral-widgets), onde são exibidos como
+   * cartões nas vistas de post/página — nenhum conteúdo é perdido.
+   * ------------------------------------------------------------------ */
+  (function () {
+    var menu = document.querySelector(".menu-principal");
+    if (!menu) return;
+    var widgets = menu.querySelectorAll(":scope > .widget");
+    if (widgets.length < 2) return;
+    var alvo = document.getElementById("lateral-widgets");
+    var menuVisto = false;
+    Array.prototype.forEach.call(widgets, function (w) {
+      // O primeiro PageList permanece como navegação do menu
+      if (!menuVisto && w.classList.contains("PageList")) {
+        menuVisto = true;
+        return;
+      }
+      if (alvo) alvo.appendChild(w);
+      else w.style.display = "none";
+    });
+  })();
+
+  /* ------------------------------------------------------------------
    * 1. TEMA — três estados (automático, claro, escuro) em ciclo.
    * A preferência crua fica em localStorage; o estado resolvido fica
    * no atributo data-tema do <html> (o anti-flash já definiu antes).

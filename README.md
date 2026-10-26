@@ -50,6 +50,31 @@ Perfil, Rótulos e Arquivo — todos substituíveis em **Layout → Barra latera
 O modo escuro deriva automaticamente do acento escolhido (o tema clareia a cor
 para manter contraste AAA sobre o fundo escuro).
 
+### Organização de widgets e a correção da vista de PC
+
+Ao instalar o tema sobre um blog que já tinha widgets (Populares, LinkLists,
+HTML, Seguidores…), o Blogger costuma despejar todos eles na primeira seção
+que aceita widgets — o **Menu principal**, dentro do cabeçalho. Na versão de
+PC isso quebrava a página: os widgets transbordavam do cabeçalho fixo e
+cobriam o conteúdo (no celular não dava para notar, porque o menu fica
+escondido no drawer).
+
+Desde a versão com esta correção, o tema resolve sozinho:
+
+1. **CSS**: a seção do menu exibe apenas a navegação (PageList) — qualquer
+   widget excedente fica oculto, em qualquer viewport;
+2. **JavaScript**: os widgets excedentes são **realocados para o fim da
+   Barra lateral** (`#lateral-widgets`) — nenhum conteúdo é perdido. Eles
+   aparecem como cartões nas vistas de post/página no desktop (a lateral da
+   home permanece oculta por design) e ganham o mesmo acabamento dos widgets
+   nativos do tema.
+
+Recomenda-se depois organizar em **Layout** o que ficar na seção "Menu
+principal": arraste cada widget para "Barra lateral" ou "Rodapé". Widgets
+adicionados manualmente a outras colunas (Rodapé — Extras, por exemplo) em
+markup padrão do Blogger (`h3.title` + `.widget-content`) também recebem
+estilização automática.
+
 ### Monetização de links (linkmonetizado.com)
 
 O tema já vem com o script de página inteira do linkmonetizado.com configurado

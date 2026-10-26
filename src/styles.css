@@ -486,6 +486,24 @@ table {
 /* Navegação principal */
 .topo__nav {
   margin-left: auto;
+  min-width: 0;
+}
+
+/* Endurecimento do menu — corrige a quebra da vista de PC quando o
+   Blogger despeja widgets antigos na seção "Menu principal" (a primeira
+   seção que aceita widgets ao instalar o tema sobre um blog existente).
+   No desktop a navegação é estática dentro do cabeçalho fixo e esses
+   widgets transbordavam, cobrindo toda a página. Aqui SOMENTE a lista
+   de navegação (PageList) é exibida; o script do tema realoca os demais
+   para a barra lateral (#lateral-widgets), onde viram cartões. Sem JS,
+   esta regra mantém o cabeçalho utilizável. */
+.menu-principal > .widget:not(.PageList) {
+  display: none;
+}
+
+/* PageLists excedentes (além do primeiro) também não pertencem ao menu */
+.menu-principal > .widget.PageList ~ .widget.PageList {
+  display: none;
 }
 
 .menu__lista {
@@ -1552,6 +1570,49 @@ html[data-busca-aberta] .busca-overlay {
   border: 1px solid var(--cor-borda);
   border-radius: var(--raio-g);
   padding: var(--espaco-5);
+}
+
+/* Widgets em markup padrão do Blogger (adicionados via Layout ou
+   realocados pelo script para a lateral): mesmo acabamento das colunas.
+   Os widgets autorais do tema usam classes próprias e não são afetados. */
+.widget .widget-content {
+  font-size: 0.9375rem;
+  color: var(--cor-texto);
+  overflow-wrap: break-word;
+}
+
+.widget .widget-content ul,
+.widget .widget-content ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.widget .widget-content li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.widget .widget-content li:last-child {
+  border-bottom: 0;
+}
+
+.widget .widget-content a {
+  color: var(--cor-texto);
+}
+
+.widget .widget-content a:hover {
+  color: var(--cor-destaque);
+}
+
+.widget .widget-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--raio-s);
+}
+
+.widget .widget-content iframe {
+  max-width: 100%;
 }
 
 /* Populares */
